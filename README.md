@@ -6,7 +6,7 @@ Web application allowing users to create and answer quiz questions.
 
 - Django
 - Django REST Framework
-- Django CORS Headers
+- Django CORS Headers (removed after integration)
 - JSON Web Token Authentication
 - React
 - React Router

@@ -31,9 +31,16 @@ const RegisterPage = () => {
       },
       body: JSON.stringify(data),
     });
+    let content = await response.json();
+    console.log(content);
     if (response.status === 200) {
       navigate("/");
+    } else if (response.status === 409 && content.message === 1) {
+      alert("Username is already taken");
+    } else if (response.status === 409 && content.message === 2) {
+      alert("This email is already in use");
     } else {
+      console.log(response);
       alert("Something went wrong");
     }
   };

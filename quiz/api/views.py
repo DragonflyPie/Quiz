@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import QuestionSerializer, UserSerializer
 from quiz.models import Question, User
 
+# JWT token serializer, includes username in the token
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -19,6 +20,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+# show all possible routes, default /api page. for developer convenience.
 @api_view(['GET'])
 def getRoutes(request):
     routes = [
@@ -30,39 +32,49 @@ def getRoutes(request):
         '/api/register/',
         '/api/profile/<int:id>/',
         '/api/create/',
+        '/api/results/',        
     ]
     return Response(routes)
 
+# register view. 
 @api_view(["POST"])
 def registerUser(request):
     data = request.data
     username = data["username"]
     password = data['password']
-    email = data["email"]      
+    email = data["email"]    
+    # if email in use return message "2" and status 409
     try:
-        user = User.objects.create_user(username, email, password)
-        user.save()
-        
-    except IntegrityError:
-        content = {'message': 'Username is already taken'}
+        emailCheck = User.objects.get(email=email)
+        content = {'message': 2}
         return Response(content, status=status.HTTP_409_CONFLICT)
-    content = {'message': 'New user created'}
-    return Response(content, status=status.HTTP_200_OK)
-
+    except:
+        # create new user if username is not taken, otherwise return error message and status 409
+        try:
+            user = User.objects.create_user(username, email, password)
+            user.save()        
+        except IntegrityError:
+            content = {'message': 1}
+            return Response(content, status=status.HTTP_409_CONFLICT)
+        content = {'message': 'New user created'}
+        return Response(content, status=status.HTTP_200_OK)
         
-
+# game view
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getGameQuestions(request):
-    # user = request.user
-    questions = Question.objects.exclude(answeredUsers = request.user)
+    # exclude answered (and created by this user) questions
+    questions = Question.objects.exclude(answeredUsers = request.user).order_by('created')
+    # if there is at least 5 questions - return them in response
     if len(questions) > 4:
         gameQuestions = questions[0:5]
         serializer = QuestionSerializer(gameQuestions, many=True)
         return Response(serializer.data)
+    # otherwise return error
     else:
         return Response({"error":"You have answered all existing questions. Maybe you want to make yours?"}, status = status.HTTP_206_PARTIAL_CONTENT)
 
+# user's questions view 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getMyQuestions(request):
@@ -71,28 +83,28 @@ def getMyQuestions(request):
     serializer = QuestionSerializer(questions, many=True)
     return Response(serializer.data)
 
-
+# save game results view
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def getGameResults(request):
-    
+def getGameResults(request):    
     data = request.data
+    # count correct answers
     correctAnswersCounter = 0
     for question in request.data:
         for key, value in question.items():
             dbQuestion = Question.objects.get(id = key)
+            # save question as answered for this user
             dbQuestion.answeredUsers.add(request.user)
             dbQuestion.save()
             if value:
                 correctAnswersCounter += 1
-            else:
-                pass# print(dbQuestion, ' dolboeb')
-    # print(correctAnswersCounter, request.user.rights)
+    # update user's correct answers and total question answered
     request.user.rights = request.user.rights + correctAnswersCounter
     request.user.guesses = request.user.guesses + 5
     request.user.save()
     return Response(data)
 
+# create question
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createQuestion(request):
@@ -109,17 +121,18 @@ def createQuestion(request):
     serializer  = QuestionSerializer(question, many=False)
     return Response(serializer.data)
 
-
+# top 10 users view
 @api_view(['GET'])
 def getRankings(request):
     users = User.objects.exclude(guesses = 0)
     users = sorted(users, key=lambda u: u.winrate, reverse=True)
     new_users = User.objects.filter(guesses = 0)
     users.extend(new_users)
+    users = users[0:10]
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
-
+# profile information view
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getProfile(request, id):

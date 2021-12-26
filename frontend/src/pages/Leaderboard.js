@@ -24,12 +24,7 @@ const Leaderboard = () => {
     let data = await response.json();
     // if everything ok,=
     if (response.status === 200) {
-      // if there are more then 10 users, show top10
-      if (data.length > 10) {
-        setUsers(data.slice(0, 10));
-      } else {
-        setUsers(data);
-      }
+      setUsers(data);
     } else if (response.statusText === "Unauthorized") {
       logoutUser();
     }

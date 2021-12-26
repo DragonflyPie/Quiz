@@ -11,6 +11,4 @@ class UserSerializer(serializers.ModelSerializer):
     winrate = serializers.ReadOnlyField()
     class Meta:
         model = User
-        
-        # fields = "__all__"
         fields = ['username', 'winrate', 'id', 'date_joined', 'guesses', 'userQuestions']

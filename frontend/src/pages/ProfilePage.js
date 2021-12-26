@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     getProfile();
-  }, []);
+  }, [params]);
 
   return (
     <div className="profile-wrapper">

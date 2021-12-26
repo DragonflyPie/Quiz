@@ -106,9 +106,9 @@ const CreateForm = ({ onReloadStateChange }) => {
             autoComplete="off"
             maxlength="40"
             value={question.answer1}
-            onChange={(e) => {
+            onChange={async (e) => {
               let newQuestion = { ...question, option1: e.target.value };
-              setQuestion(newQuestion);
+              await setQuestion(newQuestion);
             }}
           />
         </div>
@@ -119,9 +119,9 @@ const CreateForm = ({ onReloadStateChange }) => {
             name="option2"
             autoComplete="off"
             maxlength="40"
-            onChange={(e) => {
+            onChange={async (e) => {
               let newQuestion = { ...question, option2: e.target.value };
-              setQuestion(newQuestion);
+              await setQuestion(newQuestion);
             }}
             value={question.answer2}
           />
@@ -133,9 +133,9 @@ const CreateForm = ({ onReloadStateChange }) => {
             name="option3"
             maxlength="40"
             autoComplete="off"
-            onChange={(e) => {
+            onChange={async (e) => {
               let newQuestion = { ...question, option3: e.target.value };
-              setQuestion(newQuestion);
+              await setQuestion(newQuestion);
             }}
             value={question.answer3}
           />
@@ -147,9 +147,9 @@ const CreateForm = ({ onReloadStateChange }) => {
             name="option4"
             maxlength="40"
             autoComplete="off"
-            onChange={(e) => {
+            onChange={async (e) => {
               let newQuestion = { ...question, option4: e.target.value };
-              setQuestion(newQuestion);
+              await setQuestion(newQuestion);
             }}
             value={question?.answer4}
           />
@@ -159,9 +159,9 @@ const CreateForm = ({ onReloadStateChange }) => {
             <label>Right answer?</label>
             <select
               value={question.rightAnswer}
-              onChange={(e) => {
+              onChange={async (e) => {
                 let newQuestion = { ...question, rightAnswer: e.target.value };
-                setQuestion(newQuestion);
+                await setQuestion(newQuestion);
               }}
             >
               <option value=" ">-</option>
