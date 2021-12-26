@@ -4,22 +4,38 @@ import { Link } from "react-router-dom";
 import react from "react";
 
 const GamePage = () => {
+  // auth data and logout function from context provider
   let { authTokens, logoutUser } = useContext(AuthContext);
+
+  // game questions state
   let [questions, setQuestions] = useState([]);
+
+  // state to store if its enough questions to play the game
   let [game, setGame] = useState(true);
+
+  // state to store if user answered all questions and may submit the game now
   let [canSubmit, setCanSubmit] = useState(false);
+
+  //state to store if the game is finished to turn off game logic and show result
   let [finished, setFinished] = useState(false);
+
+  // new game state
   let [newGame, setNewgame] = useState(true);
+
+  // state to store answered questions
   let [counter, setCounter] = useState(0);
 
+  // get questions
   useEffect(() => {
     getQuestions();
   }, [newGame]);
 
+  // call styleOptions function
   useEffect(() => {
     styleOptions();
   }, [finished, game]);
 
+  // fetch questions
   let getQuestions = async () => {
     let response = await fetch("/api/game_questions/", {
       method: "GET",
@@ -29,16 +45,20 @@ const GamePage = () => {
       },
     });
     let data = await response.json();
+
+    // if its ok, start the game, populate the questions state
     if (response.status === 200) {
       setGame(true);
       setQuestions(data);
     } else if (response.status === 206) {
+      // if not enough questions - stop the game
       setGame(false);
     } else if (response.statusText === "Unauthorized") {
+      // logout if unauthorized call
       logoutUser();
     }
   };
-
+  // add class for css, if game is active
   let styleOptions = () => {
     let questionsList = document.querySelector("ul");
     if (!finished && game) {
@@ -48,6 +68,7 @@ const GamePage = () => {
     }
   };
 
+  // function to get other sibling options of the question
   let getOtherOptions = (e) => {
     let options = [];
     let firstOption = e.parentNode.firstChild;
@@ -61,14 +82,19 @@ const GamePage = () => {
     return options;
   };
 
+  // pick target option
   let pickOption = (e) => {
     if (!finished) {
       let thisOption = e.target;
       let otherOptions = getOtherOptions(thisOption);
+
+      // remove classes of other options
       otherOptions.map((option) => (option.className = ""));
 
+      // set active class
       thisOption.className = "active";
 
+      // parse picked option and save it in the question state
       let optionNumber = parseInt(e.target.getAttribute("data-option"));
       let questionIndex = parseInt(
         e.target.parentNode.parentNode.getAttribute("data-index")
@@ -76,16 +102,17 @@ const GamePage = () => {
       let newQuestions = questions;
       newQuestions[questionIndex].userAnswer = optionNumber;
       setQuestions(newQuestions);
-
+      // if 5 questions is answered, user can finish the game
       let answeredQuestions = document.querySelectorAll(".active");
-
       answeredQuestions.length === 5 ? setCanSubmit(true) : setCanSubmit(false);
     } else {
       return;
     }
   };
 
+  // send results to backend
   let sendGameResults = async (results) => {
+    // turn off canSubmit to prevent doubleclicking
     setCanSubmit(false);
     let response = await fetch("/api/results/", {
       method: "POST",
@@ -99,11 +126,14 @@ const GamePage = () => {
     setCanSubmit(true);
   };
 
+  // submit game
   let submitGame = () => {
+    // turn off game logic, show results
     setFinished(true);
     let results = [];
     let counter = 0;
 
+    // mark every picked option as correct or incorrect (and show the correct one in that case)
     questions.forEach((question, index) => {
       let questionDiv = document.querySelector(`[data-index="${index}"]`);
       let userOption = questionDiv.querySelector(".active");
@@ -121,10 +151,13 @@ const GamePage = () => {
         results.push({ [question.id]: false });
       }
     });
+
+    // update answered questions counter, call sendGameResults
     setCounter(counter);
     sendGameResults(results);
   };
 
+  // make finished state false, trigger new game
   let nextGame = async () => {
     await setFinished(false);
     setNewgame(!newGame);

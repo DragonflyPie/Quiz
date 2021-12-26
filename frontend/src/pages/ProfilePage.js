@@ -4,10 +4,16 @@ import { useParams } from "react-router-dom";
 import moment from "moment";
 
 const ProfilePage = () => {
+  // get params from URL
   let params = useParams();
+
+  // auth tokens and logout function from provider
   let { authTokens, logoutUser } = useContext(AuthContext);
+
+  // state to store profile data
   let [profile, setProfile] = useState({});
 
+  // fetch data, set profile state to the data if everething is ok
   let getProfile = async () => {
     let response = await fetch(`/api/profile/${params.profileId}`, {
       method: "GET",
@@ -19,7 +25,6 @@ const ProfilePage = () => {
     let data = await response.json();
     if (response.status === 200) {
       setProfile(data);
-      console.log(data);
     } else if (response.statusText === "Unauthorized") {
       logoutUser();
     }
@@ -28,6 +33,7 @@ const ProfilePage = () => {
   useEffect(() => {
     getProfile();
   }, []);
+
   return (
     <div className="profile-wrapper">
       <h1>{profile.username}</h1>

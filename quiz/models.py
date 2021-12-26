@@ -21,8 +21,6 @@ class User(AbstractUser):
 # Create your models here.
 class Question(models.Model):
     answerChoices = [(i, i) for i in range(1,5)]
-    ratingChoices = [(i, i) for i in range(1,11)]
-
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name="userQuestions")
     body = models.TextField(null=True)
     option_1 = models.TextField(null=True)
@@ -32,11 +30,3 @@ class Question(models.Model):
     rightAnswer = models.IntegerField(choices=answerChoices, null=True)
     answeredUsers = models.ManyToManyField(User, related_name="answeredQuestions", blank=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
-    # rating = models.IntegerField(validators=[MaxValueValidator(0), MaxValueValidator(5)], null=True)
-
-class Rating(models.Model):
-    ratingChoices = [(i, i) for i in range(1,11)]
-
-    value = models.IntegerField(choices=ratingChoices, null=True) 
-    rater = models.ForeignKey(User, on_delete=CASCADE, unique=True)
-    ratedQuestion = models.ForeignKey(Question, on_delete=CASCADE, unique=True)

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
 const LoginPage = () => {
+  // login function from context provider
   let { loginUser } = useContext(AuthContext);
   return (
     <div>

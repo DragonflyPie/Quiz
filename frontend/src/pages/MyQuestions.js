@@ -4,19 +4,28 @@ import CreateForm from "../components/CreateForm";
 import Button from "../components/Button";
 
 const MyQuestions = () => {
+  // auth tokens and logout function from context provider
   let { authTokens, logoutUser } = useContext(AuthContext);
+
+  // state to store questions
   let [questions, setQuestions] = useState([]);
+
+  // state to show/hide form
   let [showCreateForm, setShowCreateForm] = useState(false);
+
+  // state to reload the page
   let [reloadState, setReloadState] = useState(false);
 
   useEffect(() => {
     getQuestions();
   }, [reloadState]);
 
+  // handle reload when create form is submited
   let handleReloadStateChange = () => {
     setReloadState(!reloadState);
   };
 
+  // fetch data, set questions state to the returned data if everething is ok
   let getQuestions = async () => {
     let response = await fetch("/api/my_questions/", {
       method: "GET",
@@ -33,6 +42,7 @@ const MyQuestions = () => {
     }
   };
 
+  // hide/show create form
   let toggleCreateForm = () => {
     setShowCreateForm(!showCreateForm);
   };

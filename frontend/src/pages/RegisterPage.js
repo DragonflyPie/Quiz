@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
+  // states to store input fields
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -9,6 +10,7 @@ const RegisterPage = () => {
 
   let navigate = useNavigate();
 
+  // handle submit, check if password equals confirmation
   let handleSubmit = (e) => {
     e.preventDefault();
 
@@ -19,6 +21,7 @@ const RegisterPage = () => {
     }
   };
 
+  // send data to backend, redirect if everything is ok
   let registerUser = async () => {
     let data = { username: username, password: password, email: email };
     let response = await fetch("/api/register/", {
@@ -37,6 +40,7 @@ const RegisterPage = () => {
 
   return (
     <div>
+      {/* each input field updates corresponding states on change */}
       <h3>Fill the form to register on the website</h3>
       <form onSubmit={handleSubmit} className="register-form">
         <label>Your username?</label>

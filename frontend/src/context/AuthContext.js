@@ -7,23 +7,28 @@ const AuthContext = createContext();
 export default AuthContext;
 
 export const AuthProvider = ({ children }) => {
+  // state of authtokens. get it from localstorage and parse to JSON, if it exists. otherwise set to Null
   let [authTokens, setAuthTokens] = useState(() =>
     localStorage.getItem("authTokens")
       ? JSON.parse(localStorage.getItem("authTokens"))
       : null
   );
+  // same for userdata, coded in the token
   let [userData, setUserData] = useState(() =>
     localStorage.getItem("authTokens")
       ? jwt_decode(localStorage.getItem("authTokens"))
       : null
   );
+  // loading state
   let [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
+  // login function
   let loginUser = async (e) => {
     e.preventDefault();
 
+    // send username and password to backend
     let response = await fetch("/api/token/", {
       method: "POST",
       headers: {
@@ -37,6 +42,7 @@ export const AuthProvider = ({ children }) => {
 
     let data = await response.json();
 
+    // if data was accepted update authtokens and userdata, save token in local storage, redirect to homepage
     if (response.status === 200) {
       setAuthTokens(data);
       setUserData(jwt_decode(data.access));
@@ -47,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // refresh token send refresh token, if it exists
   let refreshToken = async () => {
     let response = await fetch("/api/token/refresh/", {
       method: "POST",
@@ -56,19 +63,25 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ refresh: authTokens?.refresh }),
     });
     let data = await response.json();
+
+    // if data is accepted, update tokens and localstorage
     if (response.status === 200) {
       setAuthTokens(data);
       setUserData(jwt_decode(data.access));
       localStorage.setItem("authTokens", JSON.stringify(data));
-    } else {
+    }
+    // if not - logout user
+    else {
       logoutUser();
     }
 
+    // set loading to false (used later)
     if (loading) {
       setLoading(false);
     }
   };
 
+  // logout, set tokens and userdata to null, remove from local storage
   let logoutUser = () => {
     setAuthTokens(null);
     setUserData(null);
@@ -76,6 +89,7 @@ export const AuthProvider = ({ children }) => {
     navigate("/login");
   };
 
+  // provided data
   let contextData = {
     userData: userData,
     authTokens: authTokens,
@@ -83,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     logoutUser: logoutUser,
   };
 
+  // if loading is true, call refresh tokens every 14 minutes
   useEffect(() => {
     if (loading) {
       refreshToken();

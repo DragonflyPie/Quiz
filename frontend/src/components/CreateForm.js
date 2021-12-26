@@ -2,7 +2,9 @@ import React, { useContext, useState } from "react";
 import AuthContext from "../context/AuthContext";
 
 const CreateForm = ({ onReloadStateChange }) => {
+  // auth data from context provider
   let { authTokens } = useContext(AuthContext);
+  // question state
   let [question, setQuestion] = useState({
     body: "",
     option1: "",
@@ -14,13 +16,14 @@ const CreateForm = ({ onReloadStateChange }) => {
 
   let addQuestion = (e) => {
     e.preventDefault();
-    let allQuestion = [];
-    allQuestion.push(question.option1);
-    allQuestion.push(question.option2);
-    allQuestion.push(question.option3);
-    allQuestion.push(question.option4);
-    console.log(allQuestion);
+    // get array of current options
+    let allOptions = [];
+    allOptions.push(question.option1);
+    allOptions.push(question.option2);
+    allOptions.push(question.option3);
+    allOptions.push(question.option4);
 
+    // is something is missing
     if (
       !question.body ||
       !question.option1 ||
@@ -32,7 +35,9 @@ const CreateForm = ({ onReloadStateChange }) => {
     ) {
       alert("Please fill all fields");
       return;
-    } else if (new Set(allQuestion).size !== 4) {
+    }
+    // if set from array < 4, meaning the was a dublicate answer
+    else if (new Set(allOptions).size !== 4) {
       alert("No dublicate answers allowed");
       return;
     } else {
@@ -40,6 +45,7 @@ const CreateForm = ({ onReloadStateChange }) => {
     }
   };
 
+  // send data to backend
   let sendQuestion = async () => {
     let response = await fetch("/api/create/", {
       method: "POST",
@@ -49,6 +55,7 @@ const CreateForm = ({ onReloadStateChange }) => {
       },
       body: JSON.stringify(question),
     });
+    // if everething ok, reset the form
     if (response.status === 200) {
       onReloadStateChange();
       setQuestion({
@@ -63,15 +70,18 @@ const CreateForm = ({ onReloadStateChange }) => {
     }
   };
 
+  // resize textarea to fit the content
   let resize = (e) => {
     let textarea = e.target;
-    console.log(textarea);
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
   };
 
   return (
     <div>
+      {/*  on submit - try to create new question
+      on change of every field update the question state
+       */}
       <form className="create-form" onSubmit={addQuestion}>
         <div className="flex-col">
           <label>Your question</label>

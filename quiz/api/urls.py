@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
+    # connect API routes to the corresponding functions
     path('', views.getRoutes),
     path('game_questions/', views.getGameQuestions, name='game'),
     path('my_questions/', views.getMyQuestions, name="my_questions"),
