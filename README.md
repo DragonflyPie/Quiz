@@ -83,6 +83,7 @@ Web application allowing users to create and answer quiz questions.
 2.  Application uses completely different main technologies - Django REST Framework, React, React Router.
 3.  Application uses different authorization system - Simple JWT tokens.
 4.  Application contains more then 20 files of code, created by myself.
+5.  Despite the simple look of the app, there is a lot happening in the frontend to make it run like it does.
 
 ## Additionl information
 
